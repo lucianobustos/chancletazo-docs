@@ -1,0 +1,372 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Chancletazo · Gallery</title>
+  <style>
+    .role-badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 2px 8px; border-radius: 999px;
+      color: #fff; font-size: 10px; font-weight: 600;
+    }
+    .path-section h2 { font-family: "JetBrains Mono", "Fira Code", ui-monospace, monospace; font-size: 14px; color: #93c5fd; }
+    *,*::before,*::after { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font: 14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      background: #0f172a;
+      color: #e2e8f0;
+    }
+    header {
+      padding: 24px 20px;
+      background: linear-gradient(135deg, #1e293b, #0f172a);
+      border-bottom: 1px solid #1e293b;
+      position: sticky; top: 0; z-index: 10;
+      backdrop-filter: blur(8px);
+    }
+    h1 { margin: 0 0 4px; font-size: 22px; letter-spacing: -0.5px; }
+    .sub { color: #94a3b8; font-size: 12px; }
+    .controls {
+      margin-top: 16px;
+      display: flex; flex-wrap: wrap; gap: 12px; align-items: center;
+    }
+    .search {
+      flex: 1 1 240px; min-width: 200px;
+      padding: 8px 12px; border-radius: 8px;
+      background: #0f172a; border: 1px solid #334155;
+      color: #e2e8f0; font: inherit;
+    }
+    .search:focus { outline: none; border-color: #60a5fa; }
+    .group-toggle {
+      display: inline-flex; gap: 0; border-radius: 8px; overflow: hidden;
+      border: 1px solid #334155;
+    }
+    .group-toggle button {
+      padding: 8px 14px; background: #0f172a; color: #94a3b8;
+      border: 0; cursor: pointer; font: inherit; font-size: 12px;
+      transition: background 0.1s ease, color 0.1s ease;
+    }
+    .group-toggle button.active { background: #1e40af; color: #fff; }
+    .group-toggle button:hover:not(.active) { background: #1e293b; color: #e2e8f0; }
+
+    nav { margin-top: 12px; display: flex; flex-wrap: wrap; gap: 8px; }
+    .role-pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 6px 12px; border-radius: 999px;
+      color: #fff; font-weight: 600; font-size: 12px;
+      text-decoration: none; border: 0; cursor: pointer; font-family: inherit;
+      transition: transform 0.1s ease, opacity 0.15s ease;
+      opacity: 0.55;
+    }
+    .role-pill.active { opacity: 1; transform: translateY(-1px); box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
+    .role-pill:hover { opacity: 1; }
+    .role-pill .count {
+      background: rgba(0,0,0,0.25); padding: 2px 6px; border-radius: 999px;
+      font-size: 10px; font-weight: 700;
+    }
+    .stats { color: #94a3b8; font-size: 11px; margin-left: auto; }
+
+    main { padding: 20px; max-width: 1400px; margin: 0 auto; }
+
+    .role-section { margin-top: 32px; scroll-margin-top: 120px; }
+    .role-section h2 {
+      font-size: 18px; margin: 0 0 12px;
+      padding-bottom: 8px; border-bottom: 2px solid;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .role-emoji { font-size: 22px; }
+    .role-count { margin-left: auto; font-size: 11px; color: #94a3b8; font-weight: 400; }
+
+    .grid {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    }
+    .card {
+      margin: 0;
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 10px;
+      overflow: hidden;
+      transition: transform 0.15s ease, border-color 0.15s ease;
+    }
+    .card:hover { transform: translateY(-2px); border-color: #64748b; }
+    .card a { display: block; line-height: 0; }
+    .card img {
+      width: 100%; height: 380px; object-fit: cover; object-position: top;
+      background: #0f172a;
+    }
+    /* Sizing por viewport — a nivel CARD para soportar vista mixta (varios viewports a la vez). */
+    .card.vp-tablet img  { height: 400px; }
+    .card.vp-desktop img { height: 240px; }
+    /* Ancho de columnas: con 1 viewport activo se ajusta a ese; en mixto, intermedio. */
+    main.vp-tablet  .grid:not(.grid-video) { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+    main.vp-desktop .grid:not(.grid-video) { grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); }
+    main.vp-multi   .grid:not(.grid-video) { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+    .vp-toggle button.active { background: #0e7490; color: #fff; }
+    /* Glifo de checkbox: refleja marcado/desmarcado. */
+    .vp-toggle .cb::before { content: '☐'; margin-right: 5px; }
+    .vp-toggle button.active .cb::before { content: '☑'; }
+    .vp-badge { font-size: 11px; opacity: 0.85; }
+    .grid-video { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+    .video-card video {
+      width: 100%; max-height: 460px; display: block;
+      background: #000; line-height: 0;
+    }
+    figcaption {
+      padding: 8px 10px;
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 11px;
+    }
+    figcaption code {
+      font-family: "JetBrains Mono", "Fira Code", ui-monospace, monospace;
+      color: #93c5fd;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      max-width: 70%;
+    }
+    .meta { color: #64748b; font-size: 10px; }
+
+    .empty {
+      padding: 60px 20px; text-align: center; color: #94a3b8;
+      border: 2px dashed #334155; border-radius: 12px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🩴🎾 Chancletazo · Gallery</h1>
+    <p class="sub">131 capturas mobile · generado 2026-09-05 08:17:39</p>
+    <div class="controls">
+      <input type="search" id="search" class="search" placeholder="🔎 filtrar por ruta (ej: lessons, admin, profile…)" />
+      
+      <div class="group-toggle" role="tablist">
+        <button type="button" data-group="role" class="active">Por rol</button>
+        <button type="button" data-group="path">Por ruta</button>
+        
+      </div>
+      <span class="stats" id="stats"></span>
+    </div>
+    <nav id="role-nav"><button type="button" class="role-pill" data-role-filter="admin" style="background:#dc2626">🔑 Admin <span class="count">35</span></button><button type="button" class="role-pill" data-role-filter="manager" style="background:#7c3aed">🎯 Manager <span class="count">30</span></button><button type="button" class="role-pill" data-role-filter="shoper" style="background:#ea580c">🛒 Shoper <span class="count">31</span></button><button type="button" class="role-pill" data-role-filter="teacher" style="background:#16a34a">🎓 Teacher <span class="count">29</span></button><button type="button" class="role-pill" data-role-filter="guest" style="background:#64748b">👻 Guest <span class="count">3</span></button><button type="button" class="role-pill" data-role-filter="shared" style="background:#0891b2">🔁 Shared <span class="count">3</span></button></nav>
+  </header>
+  <main id="main">
+    
+  </main>
+  <script>
+    const SHOTS = [{"file":"admin__admin-cnab.jpg","role":"admin","slug":"admin-cnab","viewport":"mobile","size":497160},{"file":"admin__admin-email.jpg","role":"admin","slug":"admin-email","viewport":"mobile","size":197628},{"file":"admin__admin-events-new.jpg","role":"admin","slug":"admin-events-new","viewport":"mobile","size":157397},{"file":"admin__admin-shoper-requests.jpg","role":"admin","slug":"admin-shoper-requests","viewport":"mobile","size":64049},{"file":"admin__calendar.jpg","role":"admin","slug":"calendar","viewport":"mobile","size":110732},{"file":"admin__chats.jpg","role":"admin","slug":"chats","viewport":"mobile","size":70481},{"file":"admin__clubs.jpg","role":"admin","slug":"clubs","viewport":"mobile","size":66563},{"file":"admin__couples.jpg","role":"admin","slug":"couples","viewport":"mobile","size":89590},{"file":"admin__games.jpg","role":"admin","slug":"games","viewport":"mobile","size":64436},{"file":"admin__groups.jpg","role":"admin","slug":"groups","viewport":"mobile","size":55372},{"file":"admin__home.jpg","role":"admin","slug":"home","viewport":"mobile","size":239475},{"file":"admin__invitations.jpg","role":"admin","slug":"invitations","viewport":"mobile","size":74108},{"file":"admin__lesson-detail.jpg","role":"admin","slug":"lesson-detail","viewport":"mobile","size":161976},{"file":"admin__lesson-occurrence.jpg","role":"admin","slug":"lesson-occurrence","viewport":"mobile","size":110105},{"file":"admin__lessons-calendar-day.jpg","role":"admin","slug":"lessons-calendar-day","viewport":"mobile","size":90482},{"file":"admin__lessons-calendar-month.jpg","role":"admin","slug":"lessons-calendar-month","viewport":"mobile","size":103751},{"file":"admin__lessons-calendar-week.jpg","role":"admin","slug":"lessons-calendar-week","viewport":"mobile","size":107186},{"file":"admin__lessons-calendar.jpg","role":"admin","slug":"lessons-calendar","viewport":"mobile","size":107186},{"file":"admin__lessons.jpg","role":"admin","slug":"lessons","viewport":"mobile","size":133620},{"file":"admin__ligas-admin.jpg","role":"admin","slug":"ligas-admin","viewport":"mobile","size":145510},{"file":"admin__ligas.jpg","role":"admin","slug":"ligas","viewport":"mobile","size":177269},{"file":"admin__partidos.jpg","role":"admin","slug":"partidos","viewport":"mobile","size":239475},{"file":"admin__player-card.jpg","role":"admin","slug":"player-card","viewport":"mobile","size":173410},{"file":"admin__player-detail.jpg","role":"admin","slug":"player-detail","viewport":"mobile","size":309706},{"file":"admin__players-femenino.jpg","role":"admin","slug":"players-femenino","viewport":"mobile","size":504953},{"file":"admin__players-masculino.jpg","role":"admin","slug":"players-masculino","viewport":"mobile","size":585306},{"file":"admin__players-teachers.jpg","role":"admin","slug":"players-teachers","viewport":"mobile","size":218852},{"file":"admin__players.jpg","role":"admin","slug":"players","viewport":"mobile","size":1005488},{"file":"admin__profile-edit.jpg","role":"admin","slug":"profile-edit","viewport":"mobile","size":379713},{"file":"admin__profile.jpg","role":"admin","slug":"profile","viewport":"mobile","size":493766},{"file":"admin__shop.jpg","role":"admin","slug":"shop","viewport":"mobile","size":105885},{"file":"admin__stats-highlights.jpg","role":"admin","slug":"stats-highlights","viewport":"mobile","size":117495},{"file":"admin__stats-leaderboard.jpg","role":"admin","slug":"stats-leaderboard","viewport":"mobile","size":49545},{"file":"admin__stats-usage.jpg","role":"admin","slug":"stats-usage","viewport":"mobile","size":200646},{"file":"admin__stats.jpg","role":"admin","slug":"stats","viewport":"mobile","size":142666},{"file":"guest__login.jpg","role":"guest","slug":"login","viewport":"mobile","size":236879},{"file":"guest__register.jpg","role":"guest","slug":"register","viewport":"mobile","size":99552},{"file":"guest__shop.jpg","role":"guest","slug":"shop","viewport":"mobile","size":120886},{"file":"manager__calendar.jpg","role":"manager","slug":"calendar","viewport":"mobile","size":110617},{"file":"manager__chats.jpg","role":"manager","slug":"chats","viewport":"mobile","size":70481},{"file":"manager__clubs.jpg","role":"manager","slug":"clubs","viewport":"mobile","size":59645},{"file":"manager__couples.jpg","role":"manager","slug":"couples","viewport":"mobile","size":55107},{"file":"manager__games.jpg","role":"manager","slug":"games","viewport":"mobile","size":64436},{"file":"manager__groups.jpg","role":"manager","slug":"groups","viewport":"mobile","size":42823},{"file":"manager__home.jpg","role":"manager","slug":"home","viewport":"mobile","size":255372},{"file":"manager__invitations.jpg","role":"manager","slug":"invitations","viewport":"mobile","size":74108},{"file":"manager__lesson-detail.jpg","role":"manager","slug":"lesson-detail","viewport":"mobile","size":161955},{"file":"manager__lesson-occurrence.jpg","role":"manager","slug":"lesson-occurrence","viewport":"mobile","size":110096},{"file":"manager__lessons-calendar-day.jpg","role":"manager","slug":"lessons-calendar-day","viewport":"mobile","size":91294},{"file":"manager__lessons-calendar-month.jpg","role":"manager","slug":"lessons-calendar-month","viewport":"mobile","size":103762},{"file":"manager__lessons-calendar-week.jpg","role":"manager","slug":"lessons-calendar-week","viewport":"mobile","size":107182},{"file":"manager__lessons-calendar.jpg","role":"manager","slug":"lessons-calendar","viewport":"mobile","size":107182},{"file":"manager__lessons.jpg","role":"manager","slug":"lessons","viewport":"mobile","size":184268},{"file":"manager__ligas-admin.jpg","role":"manager","slug":"ligas-admin","viewport":"mobile","size":145506},{"file":"manager__ligas.jpg","role":"manager","slug":"ligas","viewport":"mobile","size":177233},{"file":"manager__partidos.jpg","role":"manager","slug":"partidos","viewport":"mobile","size":250312},{"file":"manager__player-card.jpg","role":"manager","slug":"player-card","viewport":"mobile","size":173402},{"file":"manager__player-detail.jpg","role":"manager","slug":"player-detail","viewport":"mobile","size":188220},{"file":"manager__players-femenino.jpg","role":"manager","slug":"players-femenino","viewport":"mobile","size":495347},{"file":"manager__players-masculino.jpg","role":"manager","slug":"players-masculino","viewport":"mobile","size":576968},{"file":"manager__players-teachers.jpg","role":"manager","slug":"players-teachers","viewport":"mobile","size":212951},{"file":"manager__players.jpg","role":"manager","slug":"players","viewport":"mobile","size":990211},{"file":"manager__profile-edit.jpg","role":"manager","slug":"profile-edit","viewport":"mobile","size":343447},{"file":"manager__profile.jpg","role":"manager","slug":"profile","viewport":"mobile","size":473624},{"file":"manager__shop.jpg","role":"manager","slug":"shop","viewport":"mobile","size":105885},{"file":"manager__stats-highlights.jpg","role":"manager","slug":"stats-highlights","viewport":"mobile","size":117499},{"file":"manager__stats-leaderboard.jpg","role":"manager","slug":"stats-leaderboard","viewport":"mobile","size":49545},{"file":"manager__stats.jpg","role":"manager","slug":"stats","viewport":"mobile","size":84903},{"file":"shared__about.jpg","role":"shared","slug":"about","viewport":"mobile","size":261007},{"file":"shared__help.jpg","role":"shared","slug":"help","viewport":"mobile","size":392009},{"file":"shared__niveles.jpg","role":"shared","slug":"niveles","viewport":"mobile","size":457453},{"file":"shoper__calendar.jpg","role":"shoper","slug":"calendar","viewport":"mobile","size":111210},{"file":"shoper__chats.jpg","role":"shoper","slug":"chats","viewport":"mobile","size":70481},{"file":"shoper__clubs.jpg","role":"shoper","slug":"clubs","viewport":"mobile","size":59645},{"file":"shoper__couples.jpg","role":"shoper","slug":"couples","viewport":"mobile","size":60156},{"file":"shoper__games.jpg","role":"shoper","slug":"games","viewport":"mobile","size":64436},{"file":"shoper__groups.jpg","role":"shoper","slug":"groups","viewport":"mobile","size":42823},{"file":"shoper__home.jpg","role":"shoper","slug":"home","viewport":"mobile","size":250708},{"file":"shoper__invitations.jpg","role":"shoper","slug":"invitations","viewport":"mobile","size":74133},{"file":"shoper__lesson-detail.jpg","role":"shoper","slug":"lesson-detail","viewport":"mobile","size":153595},{"file":"shoper__lesson-occurrence.jpg","role":"shoper","slug":"lesson-occurrence","viewport":"mobile","size":92152},{"file":"shoper__lessons-calendar-day.jpg","role":"shoper","slug":"lessons-calendar-day","viewport":"mobile","size":89817},{"file":"shoper__lessons-calendar-month.jpg","role":"shoper","slug":"lessons-calendar-month","viewport":"mobile","size":102315},{"file":"shoper__lessons-calendar-week.jpg","role":"shoper","slug":"lessons-calendar-week","viewport":"mobile","size":105689},{"file":"shoper__lessons-calendar.jpg","role":"shoper","slug":"lessons-calendar","viewport":"mobile","size":105689},{"file":"shoper__lessons.jpg","role":"shoper","slug":"lessons","viewport":"mobile","size":173500},{"file":"shoper__ligas.jpg","role":"shoper","slug":"ligas","viewport":"mobile","size":168037},{"file":"shoper__partidos.jpg","role":"shoper","slug":"partidos","viewport":"mobile","size":250708},{"file":"shoper__player-card.jpg","role":"shoper","slug":"player-card","viewport":"mobile","size":173402},{"file":"shoper__player-detail.jpg","role":"shoper","slug":"player-detail","viewport":"mobile","size":179735},{"file":"shoper__players-femenino.jpg","role":"shoper","slug":"players-femenino","viewport":"mobile","size":405153},{"file":"shoper__players-masculino.jpg","role":"shoper","slug":"players-masculino","viewport":"mobile","size":476375},{"file":"shoper__players-teachers.jpg","role":"shoper","slug":"players-teachers","viewport":"mobile","size":183180},{"file":"shoper__players.jpg","role":"shoper","slug":"players","viewport":"mobile","size":802850},{"file":"shoper__profile-edit.jpg","role":"shoper","slug":"profile-edit","viewport":"mobile","size":343688},{"file":"shoper__profile.jpg","role":"shoper","slug":"profile","viewport":"mobile","size":497624},{"file":"shoper__shop-mine.jpg","role":"shoper","slug":"shop-mine","viewport":"mobile","size":41986},{"file":"shoper__shop-new.jpg","role":"shoper","slug":"shop-new","viewport":"mobile","size":57702},{"file":"shoper__shop.jpg","role":"shoper","slug":"shop","viewport":"mobile","size":107561},{"file":"shoper__stats-highlights.jpg","role":"shoper","slug":"stats-highlights","viewport":"mobile","size":117499},{"file":"shoper__stats-leaderboard.jpg","role":"shoper","slug":"stats-leaderboard","viewport":"mobile","size":49545},{"file":"shoper__stats.jpg","role":"shoper","slug":"stats","viewport":"mobile","size":84903},{"file":"teacher__calendar.jpg","role":"teacher","slug":"calendar","viewport":"mobile","size":110215},{"file":"teacher__chats.jpg","role":"teacher","slug":"chats","viewport":"mobile","size":70481},{"file":"teacher__clubs.jpg","role":"teacher","slug":"clubs","viewport":"mobile","size":59645},{"file":"teacher__couples.jpg","role":"teacher","slug":"couples","viewport":"mobile","size":60539},{"file":"teacher__games.jpg","role":"teacher","slug":"games","viewport":"mobile","size":64436},{"file":"teacher__groups.jpg","role":"teacher","slug":"groups","viewport":"mobile","size":42823},{"file":"teacher__home.jpg","role":"teacher","slug":"home","viewport":"mobile","size":250312},{"file":"teacher__invitations.jpg","role":"teacher","slug":"invitations","viewport":"mobile","size":74108},{"file":"teacher__lesson-detail.jpg","role":"teacher","slug":"lesson-detail","viewport":"mobile","size":153595},{"file":"teacher__lesson-occurrence.jpg","role":"teacher","slug":"lesson-occurrence","viewport":"mobile","size":92160},{"file":"teacher__lessons-calendar-day.jpg","role":"teacher","slug":"lessons-calendar-day","viewport":"mobile","size":88908},{"file":"teacher__lessons-calendar-month.jpg","role":"teacher","slug":"lessons-calendar-month","viewport":"mobile","size":102315},{"file":"teacher__lessons-calendar-week.jpg","role":"teacher","slug":"lessons-calendar-week","viewport":"mobile","size":105689},{"file":"teacher__lessons-calendar.jpg","role":"teacher","slug":"lessons-calendar","viewport":"mobile","size":105689},{"file":"teacher__lessons.jpg","role":"teacher","slug":"lessons","viewport":"mobile","size":137679},{"file":"teacher__ligas.jpg","role":"teacher","slug":"ligas","viewport":"mobile","size":174599},{"file":"teacher__partidos.jpg","role":"teacher","slug":"partidos","viewport":"mobile","size":250312},{"file":"teacher__player-card.jpg","role":"teacher","slug":"player-card","viewport":"mobile","size":172187},{"file":"teacher__player-detail.jpg","role":"teacher","slug":"player-detail","viewport":"mobile","size":174540},{"file":"teacher__players-femenino.jpg","role":"teacher","slug":"players-femenino","viewport":"mobile","size":407973},{"file":"teacher__players-masculino.jpg","role":"teacher","slug":"players-masculino","viewport":"mobile","size":473392},{"file":"teacher__players-teachers.jpg","role":"teacher","slug":"players-teachers","viewport":"mobile","size":185010},{"file":"teacher__players.jpg","role":"teacher","slug":"players","viewport":"mobile","size":803534},{"file":"teacher__profile-edit.jpg","role":"teacher","slug":"profile-edit","viewport":"mobile","size":344089},{"file":"teacher__profile.jpg","role":"teacher","slug":"profile","viewport":"mobile","size":491718},{"file":"teacher__shop.jpg","role":"teacher","slug":"shop","viewport":"mobile","size":105885},{"file":"teacher__stats-highlights.jpg","role":"teacher","slug":"stats-highlights","viewport":"mobile","size":117499},{"file":"teacher__stats-leaderboard.jpg","role":"teacher","slug":"stats-leaderboard","viewport":"mobile","size":49545},{"file":"teacher__stats.jpg","role":"teacher","slug":"stats","viewport":"mobile","size":84903}];
+    const VIDEOS = [];
+    const ROLE_META = {"admin":{"label":"Admin","color":"#dc2626","emoji":"🔑"},"manager":{"label":"Manager","color":"#7c3aed","emoji":"🎯"},"shoper":{"label":"Shoper","color":"#ea580c","emoji":"🛒"},"teacher":{"label":"Teacher","color":"#16a34a","emoji":"🎓"},"user":{"label":"User","color":"#2563eb","emoji":"👤"},"guest":{"label":"Guest","color":"#64748b","emoji":"👻"},"shared":{"label":"Shared","color":"#0891b2","emoji":"🔁"}};
+    const ROLE_ORDER = ["admin","manager","shoper","teacher","guest","shared"];
+    const IMG_PREFIX = "chancletazo/";
+    const VIDEO_PREFIX = "../videos/";
+    const AVAILABLE_VIEWPORTS = ["mobile"];
+
+    // Estado: filtro de texto + roles activos + agrupación + viewports (multi).
+    const state = {
+      query: '',
+      activeRoles: new Set(ROLE_ORDER),
+      groupBy: 'role', // 'role' | 'path' | 'video'
+      viewports: new Set(AVAILABLE_VIEWPORTS), // multi-select: 1, 2 o 3 a la vez (≥1)
+    };
+
+    const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    const VP_EMOJI = { mobile: '📱', tablet: '📲', desktop: '🖥️' };
+
+    function humanizeSlug(slug) {
+      if (slug === 'home') return '/';
+      return '/' + slug.replace(/-/g, '/');
+    }
+
+    function cardHtml(s, opts = {}) {
+      const meta = ROLE_META[s.role] || { label: s.role, color: '#475569', emoji: '•' };
+      const badge = opts.showRole
+        ? `<span class="role-badge" style="background:${meta.color}">${meta.emoji} ${meta.label}</span>`
+        : '';
+      // Con >1 viewport activo mostramos a cuál pertenece cada captura (badge en el meta).
+      const vpTag = state.viewports.size > 1 ? `<span class="vp-badge" title="${s.viewport}">${VP_EMOJI[s.viewport] || ''}</span> ` : '';
+      const sizeTxt = `${vpTag}${(s.size/1024).toFixed(0)} KB`;
+      const caption = opts.showRole
+        ? `<figcaption>${badge}<span class="meta">${sizeTxt}</span></figcaption>`
+        : `<figcaption><code>${esc(humanizeSlug(s.slug))}</code><span class="meta">${sizeTxt}</span></figcaption>`;
+      return `<figure class="card vp-${s.viewport}">
+        <a href="${esc(IMG_PREFIX + s.file)}" target="_blank" rel="noopener">
+          <img loading="lazy" src="${esc(IMG_PREFIX + s.file)}" alt="${esc(s.role + ' - ' + s.slug)}" />
+        </a>
+        ${caption}
+      </figure>`;
+    }
+
+    function filtered() {
+      const q = state.query.trim().toLowerCase();
+      return SHOTS.filter((s) =>
+        state.viewports.has(s.viewport) &&
+        state.activeRoles.has(s.role) &&
+        (!q || s.slug.toLowerCase().includes(q)));
+    }
+
+    // Actualiza el contador de cada pill de rol según los viewports activos.
+    function updateRoleCounts() {
+      const byRoleVp = {};
+      for (const s of SHOTS) if (state.viewports.has(s.viewport)) byRoleVp[s.role] = (byRoleVp[s.role] || 0) + 1;
+      for (const pill of document.querySelectorAll('[data-role-filter]')) {
+        const c = pill.querySelector('.count');
+        if (c) c.textContent = byRoleVp[pill.dataset.roleFilter] || 0;
+      }
+    }
+
+    function filteredVideos() {
+      const q = state.query.trim().toLowerCase();
+      return VIDEOS.filter((v) => state.activeRoles.has(v.role) && (!q || v.role.toLowerCase().includes(q) || v.user.toLowerCase().includes(q)));
+    }
+
+    function videoCardHtml(v) {
+      const meta = ROLE_META[v.role] || { label: v.role, color: '#475569', emoji: '•' };
+      return `<figure class="card video-card">
+        <video controls preload="metadata" playsinline src="${esc(VIDEO_PREFIX + v.file)}"></video>
+        <figcaption>
+          <span class="role-badge" style="background:${meta.color}">${meta.emoji} ${meta.label}</span>
+          <span class="meta">${esc(v.user)} · ${(v.size/1048576).toFixed(1)} MB</span>
+        </figcaption>
+      </figure>`;
+    }
+
+    function render() {
+      const main = document.getElementById('main');
+      const stats = document.getElementById('stats');
+
+      main.classList.remove('vp-mobile', 'vp-tablet', 'vp-desktop', 'vp-multi');
+      main.classList.add(state.viewports.size === 1 ? 'vp-' + [...state.viewports][0] : 'vp-multi');
+      updateRoleCounts();
+
+      if (state.groupBy === 'video') {
+        const vids = filteredVideos();
+        stats.textContent = `${vids.length} / ${VIDEOS.length} videos`;
+        if (!vids.length) {
+          main.innerHTML = '<div class="empty">Ningún video matchea el filtro actual.</div>';
+          return;
+        }
+        const byRole = {};
+        for (const v of vids) (byRole[v.role] ||= []).push(v);
+        main.innerHTML = ROLE_ORDER.filter((r) => byRole[r]?.length).map((r) => {
+          const meta = ROLE_META[r] || { label: r, color: '#475569', emoji: '•' };
+          const cards = byRole[r].map((v) => videoCardHtml(v)).join('');
+          return `<section id="vrole-${r}" class="role-section">
+            <h2 style="border-color:${meta.color}">
+              <span class="role-emoji">${meta.emoji}</span>
+              ${meta.label}
+              <span class="role-count">${byRole[r].length} video(s)</span>
+            </h2>
+            <div class="grid grid-video">${cards}</div>
+          </section>`;
+        }).join('');
+        return;
+      }
+
+      const data = filtered();
+      const vpTotal = SHOTS.filter((s) => state.viewports.has(s.viewport)).length;
+      const vpList = AVAILABLE_VIEWPORTS.filter((v) => state.viewports.has(v)).join(', ');
+      stats.textContent = `${data.length} / ${vpTotal} capturas · ${vpList}`;
+
+      if (!data.length) {
+        main.innerHTML = '<div class="empty">Nada matchea el filtro actual.</div>';
+        return;
+      }
+
+      if (state.groupBy === 'role') {
+        const byRole = {};
+        for (const s of data) (byRole[s.role] ||= []).push(s);
+        const html = ROLE_ORDER.filter((r) => byRole[r]?.length).map((r) => {
+          const meta = ROLE_META[r] || { label: r, color: '#475569', emoji: '•' };
+          const cards = byRole[r]
+            .sort((a, b) => a.slug.localeCompare(b.slug) || AVAILABLE_VIEWPORTS.indexOf(a.viewport) - AVAILABLE_VIEWPORTS.indexOf(b.viewport))
+            .map((s) => cardHtml(s)).join('');
+          return `<section id="role-${r}" class="role-section">
+            <h2 style="border-color:${meta.color}">
+              <span class="role-emoji">${meta.emoji}</span>
+              ${meta.label}
+              <span class="role-count">${byRole[r].length} pantallas</span>
+            </h2>
+            <div class="grid">${cards}</div>
+          </section>`;
+        }).join('');
+        main.innerHTML = html;
+      } else {
+        const bySlug = {};
+        for (const s of data) (bySlug[s.slug] ||= []).push(s);
+        const slugs = Object.keys(bySlug).sort();
+        const html = slugs.map((slug) => {
+          const cards = bySlug[slug]
+            .sort((a, b) => (ROLE_ORDER.indexOf(a.role) - ROLE_ORDER.indexOf(b.role)) || (AVAILABLE_VIEWPORTS.indexOf(a.viewport) - AVAILABLE_VIEWPORTS.indexOf(b.viewport)))
+            .map((s) => cardHtml(s, { showRole: true })).join('');
+          return `<section class="role-section path-section">
+            <h2 style="border-color:#334155">
+              ${esc(humanizeSlug(slug))}
+              <span class="role-count">${bySlug[slug].length} capturas</span>
+            </h2>
+            <div class="grid">${cards}</div>
+          </section>`;
+        }).join('');
+        main.innerHTML = html;
+      }
+    }
+
+    // Wire up: search
+    document.getElementById('search').addEventListener('input', (e) => {
+      state.query = e.target.value;
+      render();
+    });
+
+    // Wire up: role pills (click to toggle filter)
+    for (const pill of document.querySelectorAll('[data-role-filter]')) {
+      pill.classList.add('active');
+      pill.addEventListener('click', (e) => {
+        const r = e.currentTarget.dataset.roleFilter;
+        const allActive = state.activeRoles.size === ROLE_ORDER.length;
+        // Click en pill activo cuando todo está activo → solo ese rol (modo "solo this").
+        // Click cuando ya hay filtro → toggle.
+        if (allActive) {
+          state.activeRoles = new Set([r]);
+        } else if (state.activeRoles.has(r) && state.activeRoles.size === 1) {
+          state.activeRoles = new Set(ROLE_ORDER); // volver a todos
+        } else if (state.activeRoles.has(r)) {
+          state.activeRoles.delete(r);
+        } else {
+          state.activeRoles.add(r);
+        }
+        for (const p of document.querySelectorAll('[data-role-filter]')) {
+          p.classList.toggle('active', state.activeRoles.has(p.dataset.roleFilter));
+        }
+        render();
+      });
+    }
+
+    // Wire up: viewport checkboxes (multi-select — 1, 2 o 3 a la vez; nunca 0).
+    for (const btn of document.querySelectorAll('[data-viewport]')) {
+      btn.addEventListener('click', (e) => {
+        const v = e.currentTarget.dataset.viewport;
+        if (state.viewports.has(v)) {
+          if (state.viewports.size === 1) return; // no permitir desmarcar el último
+          state.viewports.delete(v);
+        } else {
+          state.viewports.add(v);
+        }
+        e.currentTarget.classList.toggle('active', state.viewports.has(v));
+        render();
+      });
+    }
+
+    // Wire up: group toggle
+    for (const btn of document.querySelectorAll('[data-group]')) {
+      btn.addEventListener('click', (e) => {
+        state.groupBy = e.currentTarget.dataset.group;
+        for (const b of document.querySelectorAll('[data-group]')) {
+          b.classList.toggle('active', b.dataset.group === state.groupBy);
+        }
+        render();
+      });
+    }
+
+    render();
+  </script>
+</body>
+</html>
